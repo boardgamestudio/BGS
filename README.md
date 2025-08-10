@@ -17,4 +17,8 @@ npm run dev
 npm run build
 ```
 
+## Deployment
+
+This app is automatically deployed to [boardgamestudio.com](https://boardgamestudio.com) via GitHub Actions when changes are pushed to the master branch.
+
 For more information and support, please contact Base44 support at app@base44.com.
