@@ -1,5 +1,5 @@
-// Temporarily using mock entities instead of Base44 API
-// This allows the app to load without Base44 dependency
+// Using mock entities until Node.js backend is ready
+// This allows the app to load without API dependency
 import {
   Project as MockProject,
   ForumPost as MockForumPost,
