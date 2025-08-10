@@ -1,18 +1,19 @@
-import { base44 } from './base44Client';
+// Temporarily using mock entities instead of Base44 API
+// This allows the app to load without Base44 dependency
+import {
+  Project as MockProject,
+  ForumPost as MockForumPost,
+  Event as MockEvent,
+  ServiceProvider as MockServiceProvider,
+  Job as MockJob,
+  DesignDiary as MockDesignDiary,
+  User as MockUser
+} from './mockEntities';
 
-
-export const Project = base44.entities.Project;
-
-export const ForumPost = base44.entities.ForumPost;
-
-export const Event = base44.entities.Event;
-
-export const ServiceProvider = base44.entities.ServiceProvider;
-
-export const Job = base44.entities.Job;
-
-export const DesignDiary = base44.entities.DesignDiary;
-
-
-// auth sdk:
-export const User = base44.auth;
+export const Project = MockProject;
+export const ForumPost = MockForumPost;
+export const Event = MockEvent;
+export const ServiceProvider = MockServiceProvider;
+export const Job = MockJob;
+export const DesignDiary = MockDesignDiary;
+export const User = MockUser;
