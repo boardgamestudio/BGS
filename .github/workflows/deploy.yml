@@ -47,7 +47,7 @@ jobs:
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         EOF
       
-    - name: Deploy React App to public_html
+    - name: Deploy React Frontend to API directory (website root)
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -56,20 +56,20 @@ jobs:
         protocol: ftps
         port: 21
         local-dir: ./dist/
-        server-dir: /home/peoplein/public_html/
+        server-dir: /home/peoplein/public_html/api/
         exclude: |
           **/.git*
           **/.git*/**
           **/node_modules/**
           
-    - name: List server files before deployment
+    - name: List server files before backend deployment
       run: |
         echo "=== Server files to deploy ==="
         ls -la ./server/
         echo "=== Current timestamp ==="
         date
         
-    - name: Deploy Backend API Server
+    - name: Deploy Node.js Backend to API directory (same root as frontend)
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -79,7 +79,6 @@ jobs:
         port: 21
         local-dir: ./server/
         server-dir: /home/peoplein/public_html/api/
-        dangerous-clean-slate: true
         log-level: verbose
         exclude: |
           **/.git*
