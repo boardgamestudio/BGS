@@ -79,8 +79,7 @@ jobs:
         port: 21
         local-dir: ./server/
         server-dir: /home/peoplein/public_html/api/
-        clean: true
-        dry-run: false
+        dangerous-clean-slate: true
         log-level: verbose
         exclude: |
           **/.git*
