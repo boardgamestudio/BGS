@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -15,7 +16,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes - NO /api prefix since /api directory IS the website root
+// Serve static files (React app) - these are in the same directory as server.js
+app.use(express.static(path.join(__dirname)));
+
+// API Routes - NO /api prefix since /api directory IS the website root
 app.use('/projects', require('./routes/projects'));
 app.use('/jobs', require('./routes/jobs'));
 app.use('/events', require('./routes/events'));
@@ -27,9 +31,16 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+// Catch-all handler: serve React app for all non-API routes
+// This enables React Router to work with direct URL access
+app.get('*', (req, res) => {
+  // If request accepts HTML (browser navigation), serve React app
+  if (req.accepts('html')) {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  } else {
+    // If request expects JSON (API call), return 404
+    res.status(404).json({ error: 'Route not found' });
+  }
 });
 
 // Error handler

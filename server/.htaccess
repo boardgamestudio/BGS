@@ -1,0 +1,10 @@
+# Node.js application configuration
+# This file is used by cPanel to set environment variables
+
+PassengerEnabled on
+PassengerAppRoot /home/peoplein/public_html/api
+PassengerStartupFile server.js
+PassengerAppType node
+PassengerNodejs /home/peoplein/nodevenv/public_html/api/22/bin/node
+
+# Environment variables will be added here by cPanel
