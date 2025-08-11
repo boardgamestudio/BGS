@@ -47,29 +47,21 @@ jobs:
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         EOF
       
-    - name: Deploy React Frontend to API directory (website root)
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps
-        port: 21
-        local-dir: ./dist/
-        server-dir: /home/peoplein/public_html/api/
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
-          
-    - name: List server files before backend deployment
+    - name: Combine frontend and backend for deployment
       run: |
-        echo "=== Server files to deploy ==="
-        ls -la ./server/
-        echo "=== Current timestamp ==="
-        date
+        echo "=== Creating combined deployment folder ==="
+        mkdir -p ./deploy
         
-    - name: Deploy Node.js Backend to API directory (same root as frontend)
+        echo "=== Copying frontend files ==="
+        cp -r ./dist/* ./deploy/
+        
+        echo "=== Copying backend files ==="
+        cp -r ./server/* ./deploy/
+        
+        echo "=== Final deployment structure ==="
+        ls -la ./deploy/
+        
+    - name: Deploy combined frontend + backend to website root
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -77,8 +69,9 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftps
         port: 21
-        local-dir: ./server/
+        local-dir: ./deploy/
         server-dir: /home/peoplein/public_html/api/
+        dangerous-clean-slate: true
         log-level: verbose
         exclude: |
           **/.git*
