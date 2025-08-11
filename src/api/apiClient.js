@@ -1,7 +1,7 @@
 // API Client for Board Game Studio
 // Handles all HTTP requests to the Node.js backend
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (process.env.NODE_ENV === 'production' ? 'https://boardgamestudio.com' : 'http://localhost:3001');
 
 class ApiError extends Error {
   constructor(message, status, data) {
@@ -13,7 +13,7 @@ class ApiError extends Error {
 }
 
 async function apiRequest(endpoint, options = {}) {
-  const url = `${API_BASE_URL}/api${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint}`;
   const config = {
     headers: {
       'Content-Type': 'application/json',

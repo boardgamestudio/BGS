@@ -15,12 +15,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/jobs', require('./routes/jobs'));
-app.use('/api/events', require('./routes/events'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/design-diaries', require('./routes/design-diaries'));
+// Routes - NO /api prefix since /api directory IS the website root
+app.use('/projects', require('./routes/projects'));
+app.use('/jobs', require('./routes/jobs'));
+app.use('/events', require('./routes/events'));
+app.use('/users', require('./routes/users'));
+app.use('/design-diaries', require('./routes/design-diaries'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
