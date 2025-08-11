@@ -39,17 +39,3 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
-          
-    - name: Deploy API to cPanel via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: ftps
-        port: 21
-        local-dir: ./api/
-        server-dir: /home/peoplein/public_html/api/
-        exclude: |
-          **/.git*
-          **/.git*/**
