@@ -71,7 +71,8 @@ jobs:
         protocol: ftps
         port: 21
         local-dir: ./server/
-        server-dir: /home/peoplein/api/
+        server-dir: /home/peoplein/public_html/api/
+        clean: true
         exclude: |
           **/.git*
           **/.git*/**
