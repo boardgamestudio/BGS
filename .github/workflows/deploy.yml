@@ -62,6 +62,13 @@ jobs:
           **/.git*/**
           **/node_modules/**
           
+    - name: List server files before deployment
+      run: |
+        echo "=== Server files to deploy ==="
+        ls -la ./server/
+        echo "=== Current timestamp ==="
+        date
+        
     - name: Deploy Backend API Server
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
@@ -73,6 +80,8 @@ jobs:
         local-dir: ./server/
         server-dir: /home/peoplein/public_html/api/
         clean: true
+        dry-run: false
+        log-level: verbose
         exclude: |
           **/.git*
           **/.git*/**
