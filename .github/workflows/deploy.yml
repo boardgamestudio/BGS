@@ -70,7 +70,7 @@ jobs:
         protocol: ftps
         port: 21
         local-dir: ./deploy/
-        server-dir: ./api/
+        server-dir: /
         dangerous-clean-slate: true
         log-level: verbose
         exclude: |
