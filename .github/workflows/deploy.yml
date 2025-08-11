@@ -1,3 +1,8 @@
+# 🚨 CRITICAL WARNING: DO NOT MODIFY DEPLOYMENT PATHS! 🚨
+# These paths worked after hours of debugging nested folder issues
+# See DEPLOYMENT-RULES-CRITICAL.md before making ANY changes
+# server-dir: / is CORRECT (not ./api/ or absolute paths)
+
 name: Build and Deploy to cPanel
 
 on:
