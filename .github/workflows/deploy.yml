@@ -70,7 +70,7 @@ jobs:
         protocol: ftps
         port: 21
         local-dir: ./deploy/
-        server-dir: /home/peoplein/public_html/api/
+        server-dir: ./api/
         dangerous-clean-slate: true
         log-level: verbose
         exclude: |
