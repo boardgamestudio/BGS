@@ -19,13 +19,35 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install dependencies
+    - name: Install frontend dependencies
       run: npm install
       
-    - name: Build project
+    - name: Build frontend
       run: npm run build
       
-    - name: Deploy React App to cPanel via FTP
+    - name: Install backend dependencies
+      run: cd server && npm install --production
+      
+    - name: Create production server environment
+      run: |
+        cd server
+        cat > .env << EOF
+        # Production Database Configuration
+        DB_HOST=localhost
+        DB_USER=peoplein_bgs_user
+        DB_PASSWORD=!QAZ2wsx#EDC
+        DB_NAME=peoplein_BGS
+        
+        # Production Server Configuration
+        PORT=3001
+        NODE_ENV=production
+        FRONTEND_URL=https://boardgamestudio.com
+        
+        # Security
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        EOF
+      
+    - name: Deploy React App to public_html
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -39,3 +61,20 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
+          
+    - name: Deploy Backend API Server
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftps
+        port: 21
+        local-dir: ./server/
+        server-dir: /home/peoplein/api/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env.example
+          **/MIGRATIONS.md

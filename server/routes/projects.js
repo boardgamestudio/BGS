@@ -98,4 +98,50 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /api/projects/:id - Update existing project
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    // Remove fields that shouldn't be updated
+    delete updateData.id;
+    delete updateData.created_date;
+    delete updateData.updated_date;
+    delete updateData.created_by_email;
+    delete updateData.author_name;
+    
+    // Convert tags to JSON if provided
+    if (updateData.tags) {
+      updateData.tags = JSON.stringify(updateData.tags);
+    }
+    
+    // Build dynamic SQL update query
+    const fields = Object.keys(updateData);
+    const setClause = fields.map(field => `${field} = ?`).join(', ');
+    const values = Object.values(updateData);
+    
+    if (fields.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+    
+    const sql = `UPDATE projects SET ${setClause}, updated_date = NOW() WHERE id = ?`;
+    values.push(id);
+    
+    const result = await db.query(sql, values);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Project updated successfully' 
+    });
+  } catch (error) {
+    console.error('Project update error:', error);
+    res.status(500).json({ error: 'Failed to update project' });
+  }
+});
+
 module.exports = router;
