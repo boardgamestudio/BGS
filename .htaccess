@@ -1,0 +1,18 @@
+# React Router SPA fallback configuration
+# This ensures direct URLs like /marketplace, /profile work properly
+
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite files or directories that exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Don't rewrite API routes (they should go to the Node.js server)
+RewriteCond %{REQUEST_URI} !^/(projects|jobs|events|users|design-diaries|health)
+
+# Don't rewrite assets folder
+RewriteCond %{REQUEST_URI} !^/assets/
+
+# Rewrite everything else to index.html for React Router
+RewriteRule ^.*$ /index.html [L]
