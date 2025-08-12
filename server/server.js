@@ -19,7 +19,34 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files (React app) - these are in the same directory as server.js
 app.use(express.static(path.join(__dirname)));
 
+// Authentication middleware
+const jwt = require('jsonwebtoken');
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      req.user = null;
+    } else {
+      req.user = user;
+    }
+    next();
+  });
+};
+
+// Apply authentication middleware to all routes
+app.use(authenticateToken);
+
 // API Routes - NO /api prefix since /api directory IS the website root
+app.use('/auth', require('./routes/auth'));
+app.use('/admin', require('./routes/admin'));
 app.use('/projects', require('./routes/projects'));
 app.use('/jobs', require('./routes/jobs'));
 app.use('/events', require('./routes/events'));
