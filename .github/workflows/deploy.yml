@@ -62,6 +62,8 @@ jobs:
         
         echo "=== Copying backend files ==="
         cp -r ./server/* ./deploy/
+        cp ./server/.htaccess ./deploy/
+        cp ./server/.env ./deploy/
         
         echo "=== Final deployment structure ==="
         ls -la ./deploy/
