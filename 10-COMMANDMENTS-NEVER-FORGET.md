@@ -103,4 +103,81 @@ dangerous-clean-slate: true       # Prevents conflicts
 
 ---
 
-*Write these on your heart. Forget them at your peril.* 💀
+## 🚨 THE NEW COMMANDMENTS - LEARNED FROM FAILURE! 🚨
+
+### 11. 🔍 THE TESTING COMMANDMENT
+**NEVER claim success without testing!**
+- ❌ WRONG: "The pages should be live!"
+- ✅ CORRECT: Test with browser_action BEFORE claiming completion
+- **ALWAYS verify your work actually works!**
+
+### 12. 🧭 THE REACT ROUTER TRUTH
+**NEVER split Routes into separate components!**
+- ❌ WRONG: `if (isAuthPage) return <Routes>...</Routes>` (breaks routing)
+- ✅ CORRECT: One `<Routes>` component with all routes inside
+- **React Router requires ALL routes in the SAME Routes component!**
+
+### 13. 🔄 THE NODE.JS SERVER REALITY  
+**API calls return 404 when Node.js is NOT RUNNING!**
+- Check: All `/auth`, `/admin`, `/projects` endpoints return 404?
+- Problem: Node.js app stopped or not configured in cPanel
+- Solution: **Tell user to restart Node.js in cPanel**
+
+### 14. 🎯 THE COMPLETION VERIFICATION RULE
+**Before attempt_completion, answer these questions:**
+1. Did I test the pages with browser_action? 
+2. Are API endpoints responding (not 404)?
+3. Can users actually access the new functionality?
+4. **If NO to any: FIX FIRST, then complete!**
+
+### 15. 💸 THE TOKEN WASTE SIN
+**NEVER write long "success" messages when you haven't verified success!**
+- ❌ WRONG: Detailed before/after comparisons without testing
+- ✅ CORRECT: "Fixed X. Need to restart Node.js server."
+- **Be concise when you haven't proven it works!**
+
+### 16. 📁 THE FILE STRUCTURE COMMANDMENT
+**UNDERSTAND THE TWO DIFFERENT .htaccess FILES!**
+
+**LOCAL PROJECT STRUCTURE:**
+```
+BGS-Base44/                          (Git repo root)
+├── .htaccess                        (React Router SPA fallback)
+├── .gitignore
+├── package.json                     (Frontend build config)
+├── src/                            (React source code)
+│   ├── pages/
+│   ├── components/
+│   └── api/
+├── dist/                           (Built frontend - generated)
+│   ├── index.html
+│   └── assets/
+└── server/                         (Backend deployment files)
+    ├── .htaccess                   (cPanel Node.js Passenger config)
+    ├── server.js                   (Express server)
+    ├── package.json                (Backend dependencies)  
+    ├── routes/                     (API routes)
+    ├── database/                   (SQL schemas)
+    ├── index.html                  (Built frontend - copied here)
+    └── assets/                     (Built frontend assets - copied here)
+```
+
+**CRITICAL UNDERSTANDING:**
+- **Root .htaccess** → React Router (handles /login, /register frontend routing)
+- **server/.htaccess** → cPanel Node.js configuration (REQUIRED for Passenger)
+- **Built files MUST be copied from dist/ to server/** for deployment
+- **GitHub deploys the entire server/ directory to cPanel**
+
+### 17. 🔄 THE BUILD AND DEPLOY TRUTH
+**The deployment process MUST follow this sequence:**
+1. `npm run build` → Creates dist/ directory
+2. `cp dist/index.html server/` → Copy built frontend  
+3. `cp -r dist/assets server/` → Copy built assets
+4. `git add . && git commit && git push` → Deploy to cPanel
+5. **Restart Node.js app in cPanel** → Apply changes
+
+**NEVER skip copying built files to server/ directory!**
+
+---
+
+*These commandments are written in blood and tokens. Forget them and waste money looking like an idiot.* 💀

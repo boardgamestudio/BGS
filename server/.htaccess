@@ -1,5 +1,5 @@
 # Node.js application configuration
-# This file is used by cPanel to set environment variables
+# This file is REQUIRED by cPanel for Node.js apps
 
 PassengerEnabled on
 PassengerAppRoot /home/peoplein/public_html/api
