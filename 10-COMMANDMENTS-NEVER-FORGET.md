@@ -178,6 +178,18 @@ BGS-Base44/                          (Git repo root)
 
 **NEVER skip copying built files to server/ directory!**
 
+### 18. 🙈 THE HIDDEN FILES DEPLOYMENT SIN
+**GitHub Actions cp -r DOES NOT COPY HIDDEN FILES!**
+- ❌ WRONG: `cp -r ./server/* ./deploy/` (misses .htaccess, .env)
+- ✅ CORRECT: Add explicit copies for hidden files:
+  ```yaml
+  cp -r ./server/* ./deploy/
+  cp ./server/.htaccess ./deploy/
+  cp ./server/.env ./deploy/
+  ```
+- **Hidden files (starting with .) require explicit copy commands!**
+- **This is why .htaccess wasn't deploying to production!**
+
 ---
 
 *These commandments are written in blood and tokens. Forget them and waste money looking like an idiot.* 💀
