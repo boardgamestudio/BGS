@@ -22,6 +22,12 @@ import ResourceDetails from "./ResourceDetails";
 
 import JobDetails from "./JobDetails";
 
+import Login from "./Login";
+
+import Register from "./Register";
+
+import Admin from "./Admin";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -68,6 +74,18 @@ function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
     
+    // Auth pages don't need the Layout wrapper
+    const isAuthPage = ['/login', '/register'].includes(location.pathname);
+    
+    if (isAuthPage) {
+        return (
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+            </Routes>
+        );
+    }
+    
     return (
         <Layout currentPageName={currentPage}>
             <Routes>            
@@ -96,6 +114,8 @@ function PagesContent() {
                 <Route path="/ResourceDetails" element={<ResourceDetails />} />
                 
                 <Route path="/JobDetails" element={<JobDetails />} />
+                
+                <Route path="/admin" element={<Admin />} />
                 
             </Routes>
         </Layout>

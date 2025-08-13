@@ -9,7 +9,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 # Don't rewrite API routes (they should go to the Node.js server)
-RewriteCond %{REQUEST_URI} !^/(projects|jobs|events|users|design-diaries|health)
+RewriteCond %{REQUEST_URI} !^/(projects|jobs|events|users|design-diaries|health|auth|admin)
 
 # Don't rewrite assets folder
 RewriteCond %{REQUEST_URI} !^/assets/
