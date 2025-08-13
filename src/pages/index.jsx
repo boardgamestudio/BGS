@@ -74,51 +74,27 @@ function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
     
-    // Auth pages don't need the Layout wrapper
-    const isAuthPage = ['/login', '/register'].includes(location.pathname);
-    
-    if (isAuthPage) {
-        return (
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-            </Routes>
-        );
-    }
-    
     return (
-        <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<Dashboard />} />
-                
-                
-                <Route path="/Dashboard" element={<Dashboard />} />
-                
-                <Route path="/Projects" element={<Projects />} />
-                
-                <Route path="/Events" element={<Events />} />
-                
-                <Route path="/Marketplace" element={<Marketplace />} />
-                
-                <Route path="/Resources" element={<Resources />} />
-                
-                <Route path="/Profiles" element={<Profiles />} />
-                
-                <Route path="/Jobs" element={<Jobs />} />
-                
-                <Route path="/Profile" element={<Profile />} />
-                
-                <Route path="/ProjectDetails" element={<ProjectDetails />} />
-                
-                <Route path="/ResourceDetails" element={<ResourceDetails />} />
-                
-                <Route path="/JobDetails" element={<JobDetails />} />
-                
-                <Route path="/admin" element={<Admin />} />
-                
-            </Routes>
-        </Layout>
+        <Routes>
+            {/* Auth pages without Layout */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/admin" element={<Admin />} />
+            
+            {/* Regular pages with Layout */}
+            <Route path="/" element={<Layout currentPageName={currentPage}><Dashboard /></Layout>} />
+            <Route path="/Dashboard" element={<Layout currentPageName={currentPage}><Dashboard /></Layout>} />
+            <Route path="/Projects" element={<Layout currentPageName={currentPage}><Projects /></Layout>} />
+            <Route path="/Events" element={<Layout currentPageName={currentPage}><Events /></Layout>} />
+            <Route path="/Marketplace" element={<Layout currentPageName={currentPage}><Marketplace /></Layout>} />
+            <Route path="/Resources" element={<Layout currentPageName={currentPage}><Resources /></Layout>} />
+            <Route path="/Profiles" element={<Layout currentPageName={currentPage}><Profiles /></Layout>} />
+            <Route path="/Jobs" element={<Layout currentPageName={currentPage}><Jobs /></Layout>} />
+            <Route path="/Profile" element={<Layout currentPageName={currentPage}><Profile /></Layout>} />
+            <Route path="/ProjectDetails" element={<Layout currentPageName={currentPage}><ProjectDetails /></Layout>} />
+            <Route path="/ResourceDetails" element={<Layout currentPageName={currentPage}><ResourceDetails /></Layout>} />
+            <Route path="/JobDetails" element={<Layout currentPageName={currentPage}><JobDetails /></Layout>} />
+        </Routes>
     );
 }
 
