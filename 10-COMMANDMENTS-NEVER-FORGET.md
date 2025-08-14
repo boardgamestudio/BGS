@@ -190,6 +190,14 @@ BGS-Base44/                          (Git repo root)
 - **Hidden files (starting with .) require explicit copy commands!**
 - **This is why .htaccess wasn't deploying to production!**
 
+### 19. 💀 THE .ENV OVERWRITING DEATH TRAP
+**NEVER overwrite working .env files in deployment!**
+- ❌ WRONG: `cat > .env << EOF` in GitHub Actions (overwrites working config)
+- ✅ CORRECT: Use existing .env file with working credentials
+- **Problem**: Template .env with `JWT_SECRET=${{ secrets.JWT_SECRET }}` becomes blank
+- **Result**: Node.js app crashes on startup with 503 errors
+- **Solution**: Remove .env generation, use committed .env file**
+
 ---
 
 *These commandments are written in blood and tokens. Forget them and waste money looking like an idiot.* 💀
