@@ -44,7 +44,23 @@ jobs:
         echo "=== Copying backend files ==="
         cp -r ./server/* ./deploy/
         cp ./server/.htaccess ./deploy/
-        cp ./server/.env ./deploy/
+        
+        echo "=== Creating production .env ==="
+        cat > ./deploy/.env << EOF
+        # Production Database Configuration
+        DB_HOST=localhost
+        DB_USER=peoplein_bgs_user
+        DB_PASSWORD=!QAZ2wsx#EDC
+        DB_NAME=peoplein_BGS
+        
+        # Production Server Configuration
+        PORT=3001
+        NODE_ENV=production
+        FRONTEND_URL=https://boardgamestudio.com
+        
+        # Security
+        JWT_SECRET=bgs_production_jwt_secret_2025_secure_key_change_me
+        EOF
         
         echo "=== Final deployment structure ==="
         ls -la ./deploy/
