@@ -1,10 +1,24 @@
+
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, author, projectAuthors = {} }) {
+
+  const getInitials = (name) => {
+    if (!name) return '?';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return names[0].charAt(0) + (names[names.length - 1].charAt(0) || '');
+    }
+    return name.charAt(0);
+  };
+
+  // Try multiple ways to find the author
+  const actualAuthor = author || projectAuthors[project.created_by] || projectAuthors[project.created_by_id] || projectAuthors[project.author_id];
   
   return (
     <Link to={createPageUrl(`ProjectDetails?id=${project.id}`)} className="group">
@@ -27,14 +41,25 @@ export default function ProjectCard({ project }) {
                 <h3 className="text-lg font-bold font-serif text-main mb-2 line-clamp-1 group-hover:text-primary transition-colors">
                     {project.title}
                 </h3>
-                <p className="text-sm text-text-muted line-clamp-2 mb-4">
+                <p className="text-sm text-slate-300 line-clamp-2 mb-4">
                     {project.short_description}
                 </p>
                 <div className="mt-auto flex items-center justify-between">
                      <Badge className="bg-secondary/10 text-secondary border-secondary/20 capitalize font-medium">
                         {project.project_type?.replace(/_/g, ' ')}
                     </Badge>
-                     <p className="text-xs text-text-muted">by {project.created_by.split('@')[0]}</p>
+                     
+                     <div 
+                        className="flex items-center"
+                        title={actualAuthor?.display_name || actualAuthor?.full_name || 'Unknown Author'}
+                     >
+                        <Avatar className="w-10 h-10 border-2 border-surface">
+                            <AvatarImage src={actualAuthor?.profile_picture} />
+                            <AvatarFallback className="text-sm bg-slate-700 text-slate-300">
+                                {getInitials(actualAuthor?.display_name || actualAuthor?.full_name || 'U')}
+                            </AvatarFallback>
+                        </Avatar>
+                     </div>
                 </div>
             </CardContent>
         </Card>

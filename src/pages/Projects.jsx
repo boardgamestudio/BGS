@@ -1,58 +1,86 @@
-
 import React, { useState, useEffect } from "react";
 import { Project, User } from "@/api/entities";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { 
+import {
   Plus,
-  Search, 
-  FilterIcon,
+  Search,
   Users,
-  Clock,
-  DollarSign,
-  Star,
-  MapPin,
-  Calendar
+  LogIn
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProjectFormModal from "../components/projects/ProjectFormModal";
 import ProjectCard from "../components/projects/ProjectCard";
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
+  const [projectAuthors, setProjectAuthors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [projectTypeFilter, setProjectTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
-    loadProjects();
+    loadData();
   }, []);
 
-  const loadProjects = async () => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      const projectList = await Project.list('-updated_date');
-      setProjects(projectList);
+      const user = await User.me();
+      setCurrentUser(user);
     } catch (error) {
-      console.error("Error loading projects:", error);
+      setCurrentUser(null); // User is not logged in
+    }
+
+    try {
+      // Always load public projects for all visitors.
+      // Logged-in users will see a "Create" button, but the list is public.
+      const projectList = await Project.filter({ project_privacy: 'public' }, '-updated_date');
+      setProjects(projectList);
+
+      if (projectList.length > 0) {
+        const authorEmails = [...new Set(projectList.map(p => p.created_by).filter(e => e && typeof e === 'string' && e.includes('@')))];
+        const authorIds = [...new Set(projectList.map(p => p.author_id || p.created_by_id).filter(id => id))];
+        
+        const authorsMap = {};
+
+        if (authorEmails.length > 0) {
+          const authorsByEmail = await User.filter({ email: { in: authorEmails } });
+          authorsByEmail.forEach(author => {
+            if (author.email) authorsMap[author.email] = author;
+            if (author.id) authorsMap[author.id] = author;
+          });
+        }
+        
+        const idsToFetch = authorIds.filter(id => !authorsMap[id]);
+        if (idsToFetch.length > 0) {
+          const authorsById = await User.filter({ id: { in: idsToFetch } });
+          authorsById.forEach(author => {
+            if (author.id) authorsMap[author.id] = author;
+          });
+        }
+        setProjectAuthors(authorsMap);
+      }
+    } catch (error) {
+      console.error("Error loading projects or authors:", error);
     }
     setLoading(false);
   };
 
   const handleCreateSuccess = () => {
     setShowCreateModal(false);
-    loadProjects();
+    loadData();
   };
 
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.short_description.toLowerCase().includes(searchQuery.toLowerCase());
+    project.short_description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesProjectType = projectTypeFilter === "all" || project.project_type === projectTypeFilter;
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     return matchesSearch && matchesProjectType && matchesStatus;
@@ -65,16 +93,18 @@ export default function Projects() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold font-serif text-main mb-2">Projects</h1>
-            <p className="text-text-muted">Discover and collaborate on amazing board game projects</p>
+            <h1 className="text-4xl font-bold font-serif text-main mb-2">Game Designs</h1>
+            <p className="text-slate-300">Discover and collaborate on amazing tabletop game projects</p>
           </div>
-          <Button 
-            onClick={() => setShowCreateModal(true)}
-            className="btn-primary"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Project
-          </Button>
+          {currentUser && (
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-primary"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Project
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
@@ -88,15 +118,14 @@ export default function Projects() {
                     placeholder="Search projects..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-background border-border-default focus:border-primary text-main"
-                  />
+                    className="pl-10 bg-background border-border-default focus:border-primary text-white" />
                 </div>
               </div>
               <Select value={projectTypeFilter} onValueChange={setProjectTypeFilter}>
-                <SelectTrigger className="w-full md:w-48 bg-background border-border-default text-main">
+                <SelectTrigger className="w-full md:w-48 bg-background border-border-default text-white">
                   <SelectValue placeholder="Project Type" />
                 </SelectTrigger>
-                <SelectContent className="bg-surface border-border-default text-main">
+                <SelectContent className="bg-surface border-border-default text-white">
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="strategy">Strategy</SelectItem>
                   <SelectItem value="party">Party</SelectItem>
@@ -110,10 +139,10 @@ export default function Projects() {
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-48 bg-background border-border-default text-main">
+                <SelectTrigger className="w-full md:w-48 bg-background border-border-default text-white">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-surface border-border-default text-main">
+                <SelectContent className="bg-surface border-border-default text-white">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="concept">Concept</SelectItem>
                   <SelectItem value="in_development">In Development</SelectItem>
@@ -128,7 +157,7 @@ export default function Projects() {
         {/* Projects Grid */}
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3,4,5,6].map(i => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-surface rounded-lg h-80"></div>
               </div>
@@ -137,7 +166,7 @@ export default function Projects() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} projectAuthors={projectAuthors} />
             ))}
           </div>
         )}
@@ -149,13 +178,14 @@ export default function Projects() {
             </div>
             <h3 className="text-xl font-semibold text-main mb-2">No projects found</h3>
             <p className="text-text-muted mb-6">Try adjusting your search criteria or create a new project</p>
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              className="btn-primary"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Project
-            </Button>
+            {currentUser && (
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="btn-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Project
+              </Button>
+            )}
           </div>
         )}
       </div>

@@ -4,8 +4,6 @@ import Dashboard from "./Dashboard";
 
 import Projects from "./Projects";
 
-import Community from "./Community";
-
 import Events from "./Events";
 
 import Marketplace from "./Marketplace";
@@ -20,6 +18,16 @@ import Profile from "./Profile";
 
 import ProjectDetails from "./ProjectDetails";
 
+import ResourceDetails from "./ResourceDetails";
+
+import JobDetails from "./JobDetails";
+
+import Login from "./Login";
+
+import Register from "./Register";
+
+import Admin from "./Admin";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -27,8 +35,6 @@ const PAGES = {
     Dashboard: Dashboard,
     
     Projects: Projects,
-    
-    Community: Community,
     
     Events: Events,
     
@@ -43,6 +49,10 @@ const PAGES = {
     Profile: Profile,
     
     ProjectDetails: ProjectDetails,
+    
+    ResourceDetails: ResourceDetails,
+    
+    JobDetails: JobDetails,
     
 }
 
@@ -65,34 +75,26 @@ function PagesContent() {
     const currentPage = _getCurrentPage(location.pathname);
     
     return (
-        <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<Dashboard />} />
-                
-                
-                <Route path="/Dashboard" element={<Dashboard />} />
-                
-                <Route path="/Projects" element={<Projects />} />
-                
-                <Route path="/Community" element={<Community />} />
-                
-                <Route path="/Events" element={<Events />} />
-                
-                <Route path="/Marketplace" element={<Marketplace />} />
-                
-                <Route path="/Resources" element={<Resources />} />
-                
-                <Route path="/Profiles" element={<Profiles />} />
-                
-                <Route path="/Jobs" element={<Jobs />} />
-                
-                <Route path="/Profile" element={<Profile />} />
-                
-                <Route path="/ProjectDetails" element={<ProjectDetails />} />
-                
-            </Routes>
-        </Layout>
+        <Routes>
+            {/* Auth pages without Layout */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/admin" element={<Admin />} />
+            
+            {/* Regular pages with Layout */}
+            <Route path="/" element={<Layout currentPageName={currentPage}><Dashboard /></Layout>} />
+            <Route path="/Dashboard" element={<Layout currentPageName={currentPage}><Dashboard /></Layout>} />
+            <Route path="/Projects" element={<Layout currentPageName={currentPage}><Projects /></Layout>} />
+            <Route path="/Events" element={<Layout currentPageName={currentPage}><Events /></Layout>} />
+            <Route path="/Marketplace" element={<Layout currentPageName={currentPage}><Marketplace /></Layout>} />
+            <Route path="/Resources" element={<Layout currentPageName={currentPage}><Resources /></Layout>} />
+            <Route path="/Profiles" element={<Layout currentPageName={currentPage}><Profiles /></Layout>} />
+            <Route path="/Jobs" element={<Layout currentPageName={currentPage}><Jobs /></Layout>} />
+            <Route path="/Profile" element={<Layout currentPageName={currentPage}><Profile /></Layout>} />
+            <Route path="/ProjectDetails" element={<Layout currentPageName={currentPage}><ProjectDetails /></Layout>} />
+            <Route path="/ResourceDetails" element={<Layout currentPageName={currentPage}><ResourceDetails /></Layout>} />
+            <Route path="/JobDetails" element={<Layout currentPageName={currentPage}><JobDetails /></Layout>} />
+        </Routes>
     );
 }
 

@@ -1,20 +1,12 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
 
 export default function ManageGroups() {
-  return (
-    <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader>
-            <CardTitle className="text-white">Manage Your Groups</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="text-center py-10">
-                <Users className="mx-auto h-12 w-12 text-gray-500" />
-                <h3 className="mt-2 text-lg font-medium text-white">Group Management Coming Soon</h3>
-                <p className="mt-1 text-sm text-slate-400">This feature is under development. Stay tuned!</p>
-            </div>
-        </CardContent>
-    </Card>
-  );
+    return (
+        <div className="text-center py-12 border border-dashed border-border-default rounded-lg">
+            <Users className="w-12 h-12 mx-auto text-text-muted mb-4" />
+            <h3 className="text-lg font-semibold text-main">Group Management is Coming Soon!</h3>
+            <p className="text-text-muted mt-2">Create and manage your own communities and interest groups.</p>
+        </div>
+    );
 }

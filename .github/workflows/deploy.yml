@@ -1,0 +1,85 @@
+# 🚨 CRITICAL WARNING: DO NOT MODIFY DEPLOYMENT PATHS! 🚨
+# These paths worked after hours of debugging nested folder issues
+# See DEPLOYMENT-RULES-CRITICAL.md before making ANY changes
+# server-dir: / is CORRECT (not ./api/ or absolute paths)
+
+name: Build and Deploy to cPanel
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install frontend dependencies
+      run: npm install
+      
+    - name: Build frontend
+      run: npm run build
+      
+    - name: Install backend dependencies
+      run: cd server && npm install --production
+      
+    - name: Combine frontend and backend for deployment
+      run: |
+        echo "=== Creating combined deployment folder ==="
+        mkdir -p ./deploy
+        
+        echo "=== Copying frontend files ==="
+        cp -r ./dist/* ./deploy/
+        
+        echo "=== Copying backend files ==="
+        cp -r ./server/* ./deploy/
+        cp ./server/.htaccess ./deploy/
+        
+        echo "=== Creating production .env ==="
+        cat > ./deploy/.env << EOF
+        # Production Database Configuration
+        DB_HOST=localhost
+        DB_USER=peoplein_bgs_user
+        DB_PASSWORD=!QAZ2wsx#EDC
+        DB_NAME=peoplein_BGS
+        
+        # Production Server Configuration
+        PORT=3001
+        NODE_ENV=production
+        FRONTEND_URL=https://boardgamestudio.com
+        
+        # Security
+        JWT_SECRET=bgs_production_jwt_secret_2025_secure_key_change_me
+        EOF
+        
+        echo "=== Final deployment structure ==="
+        ls -la ./deploy/
+        
+    - name: Deploy combined frontend + backend to website root
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftps
+        port: 21
+        local-dir: ./deploy/
+        server-dir: /
+        dangerous-clean-slate: true
+        log-level: verbose
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env.example
+          **/MIGRATIONS.md

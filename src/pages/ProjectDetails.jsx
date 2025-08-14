@@ -1,21 +1,24 @@
+
 import React, { useState, useEffect } from 'react';
 import { Project, User } from '@/api/entities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Clock, Edit, User as UserIcon, Puzzle, Star, Link as LinkIcon, ExternalLink, ThumbsUp, MessageSquare, BookOpen, Layers } from 'lucide-react';
+import { Users, Clock, Edit, User as UserIcon, Puzzle, Star, Link as LinkIcon, ExternalLink, ThumbsUp, MessageSquare, BookOpen, Layers, FileText, Printer, Globe } from 'lucide-react';
 import ProjectFormModal from '../components/projects/ProjectFormModal';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function ProjectDetailsPage() {
     const [project, setProject] = useState(null);
     const [creator, setCreator] = useState(null);
-    const [collaborators, setCollaborators] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [error, setError] = useState(null);
     
     const getProjectId = () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -30,6 +33,7 @@ export default function ProjectDetailsPage() {
         }
         
         setLoading(true);
+        setError(null);
         try {
             const projectData = await Project.get(projectId);
             setProject(projectData);
@@ -38,14 +42,10 @@ export default function ProjectDetailsPage() {
                 const creatorData = await User.filter({ email: projectData.created_by });
                 if(creatorData.length > 0) setCreator(creatorData[0]);
             }
-            
-            if (projectData.collaborators && projectData.collaborators.length > 0) {
-                const collaboratorData = await User.filter({ id: { $in: projectData.collaborators }});
-                setCollaborators(collaboratorData);
-            }
 
-        } catch (error) {
-            console.error("Failed to load project", error);
+        } catch (err) {
+            console.error("Failed to load project", err);
+            setError("Could not load game design details. The server might be temporarily unavailable. Please try again later.");
         }
         setLoading(false);
     };
@@ -71,6 +71,16 @@ export default function ProjectDetailsPage() {
 
     if (loading) {
         return <div className="text-center p-10 text-white">Loading project...</div>;
+    }
+    
+    if (error) {
+        return (
+            <div className="text-center py-10">
+              <h2 className="text-2xl font-bold text-destructive">An Error Occurred</h2>
+              <p className="text-slate-400">{error}</p>
+              <Link to={createPageUrl('Projects')}><Button className="mt-4">Back to Game Designs</Button></Link>
+            </div>
+        )
     }
 
     if (!project) {
@@ -103,7 +113,7 @@ export default function ProjectDetailsPage() {
                     <p className="mt-2 text-lg text-slate-200 max-w-3xl shadow-md">{project.short_description}</p>
                 </div>
                 {isOwnerOrCollaborator && (
-                     <Button onClick={() => setShowEditModal(true)} className="absolute top-6 right-6 bg-gray-800/70 hover:bg-gray-700"><Edit className="w-4 h-4 mr-2" /> Edit Project</Button>
+                     <Button onClick={() => setShowEditModal(true)} className="absolute top-6 right-6 bg-gray-800/70 hover:bg-gray-700"><Edit className="w-4 h-4 mr-2" /> Edit Game Design</Button>
                 )}
             </div>
 
@@ -112,12 +122,64 @@ export default function ProjectDetailsPage() {
                 <div className="lg:col-span-2 space-y-8">
                     <Card className="bg-gray-800 border-gray-700">
                         <CardHeader>
-                            <CardTitle>About this Project</CardTitle>
+                            <CardTitle>About this Game Design</CardTitle>
                         </CardHeader>
                         <CardContent className="prose prose-invert prose-slate max-w-none">
                             <ReactMarkdown>{project.full_description || "No full description provided."}</ReactMarkdown>
                         </CardContent>
                     </Card>
+
+                    {/* Downloads Section */}
+                    {(project.sell_sheet_url || project.rules_url || project.print_and_play_url) && (
+                        <Card className="bg-gray-800 border-gray-700">
+                            <CardHeader><CardTitle>Downloads</CardTitle></CardHeader>
+                            <CardContent className="space-y-3">
+                                {project.sell_sheet_url && (
+                                    <a href={project.sell_sheet_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                        <FileText className="w-5 h-5 mr-3 text-primary" />
+                                        <div>
+                                            <p className="font-medium text-white">Sell Sheet</p>
+                                            <p className="text-sm text-gray-300">Marketing document for the game</p>
+                                        </div>
+                                    </a>
+                                )}
+                                {project.rules_url && (
+                                    <a href={project.rules_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                        <BookOpen className="w-5 h-5 mr-3 text-secondary" />
+                                        <div>
+                                            <p className="font-medium text-white">Rules</p>
+                                            <p className="text-sm text-gray-300">Game rules document</p>
+                                        </div>
+                                    </a>
+                                )}
+                                {project.print_and_play_url && (
+                                    <a href={project.print_and_play_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                        <Printer className="w-5 h-5 mr-3 text-info" />
+                                        <div>
+                                            <p className="font-medium text-white">Print and Play</p>
+                                            <p className="text-sm text-gray-300">Printable version of the game</p>
+                                        </div>
+                                    </a>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Play Online Section */}
+                    {project.play_online_url && (
+                        <Card className="bg-gray-800 border-gray-700">
+                            <CardHeader><CardTitle>Play Online</CardTitle></CardHeader>
+                            <CardContent>
+                                <a href={project.play_online_url} target="_blank" rel="noopener noreferrer" className="flex items-center p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
+                                    <Globe className="w-5 h-5 mr-3 text-emerald-400" />
+                                    <div>
+                                        <p className="font-medium text-white">Play on {project.play_online_platform || 'Online Platform'}</p>
+                                        <p className="text-sm text-gray-300">Click to play online</p>
+                                    </div>
+                                </a>
+                            </CardContent>
+                        </Card>
+                    )}
 
                     {project.gallery_image_urls?.length > 0 && (
                         <Card className="bg-gray-800 border-gray-700">
@@ -136,6 +198,7 @@ export default function ProjectDetailsPage() {
                          <Card className="bg-gray-800 border-gray-700">
                             <CardHeader><CardTitle>Video Showcase</CardTitle></CardHeader>
                             <CardContent>
+                               {/* Extract YouTube video ID from URL for embed */}
                                <iframe className="w-full aspect-video rounded-lg" src={`https://www.youtube.com/embed/${project.gallery_youtube_url.split('v=')[1]}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
                             </CardContent>
                         </Card>
@@ -146,52 +209,38 @@ export default function ProjectDetailsPage() {
                 {/* Right Column */}
                 <div className="space-y-6">
                     <Card className="bg-gray-800 border-gray-700">
-                        <CardHeader><CardTitle>Project Details</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Game Design Details</CardTitle></CardHeader>
                         <CardContent className="space-y-4 text-sm">
-                            <div className="flex justify-between"><span>Status:</span> <Badge className="capitalize bg-emerald-400/10 text-emerald-300">{project.status?.replace('_', ' ')}</Badge></div>
-                            <div className="flex justify-between items-center"><span><UserIcon className="inline w-4 h-4 mr-2"/>Players:</span> <span className="font-medium text-white">{getPlayerCount()}</span></div>
-                            <div className="flex justify-between items-center"><span><Clock className="inline w-4 h-4 mr-2"/>Time:</span> <span className="font-medium text-white">{getPlayingTime()}</span></div>
-                            <div className="flex justify-between items-center"><span><Layers className="inline w-4 h-4 mr-2"/>Age:</span> <span className="font-medium text-white">{project.age_range || 'N/A'}</span></div>
-                            <div className="flex justify-between items-center"><span><Puzzle className="inline w-4 h-4 mr-2"/>Complexity:</span> <span className="font-medium text-white capitalize">{project.complexity || 'N/A'}</span></div>
-                            {project.estimated_release_date && <div className="flex justify-between"><span>Est. Release:</span> <span className="font-medium text-white">{format(new Date(project.estimated_release_date), 'MMM yyyy')}</span></div>}
+                            <div className="flex justify-between items-center"><span className="text-slate-400">Status:</span> <Badge className="capitalize bg-emerald-400/10 text-emerald-300">{project.status?.replace('_', ' ')}</Badge></div>
+                            <div className="flex justify-between items-center"><span className="flex items-center text-slate-400"><UserIcon className="inline w-4 h-4 mr-2"/>Players:</span> <span className="font-medium text-white">{getPlayerCount()}</span></div>
+                            <div className="flex justify-between items-center"><span className="flex items-center text-slate-400"><Clock className="inline w-4 h-4 mr-2"/>Time:</span> <span className="font-medium text-white">{getPlayingTime()}</span></div>
+                            <div className="flex justify-between items-center"><span className="flex items-center text-slate-400"><Layers className="inline w-4 h-4 mr-2"/>Age:</span> <span className="font-medium text-white">{project.age_range || 'N/A'}</span></div>
+                            <div className="flex justify-between items-center"><span className="flex items-center text-slate-400"><Puzzle className="inline w-4 h-4 mr-2"/>Complexity:</span> <span className="font-medium text-white capitalize">{project.complexity || 'N/A'}</span></div>
+                            {project.estimated_release_date && <div className="flex justify-between items-center"><span className="text-slate-400">Est. Release:</span> <span className="font-medium text-white">{format(new Date(project.estimated_release_date), 'MMM yyyy')}</span></div>}
+                            {project.looking_for_publisher && <div className="flex items-center gap-2"><span className="text-amber-400">📢</span> <span className="text-amber-400 font-medium">Looking for Publisher</span></div>}
+                            {project.looking_for_manufacturer && <div className="flex items-center gap-2"><span className="text-blue-400">🏭</span> <span className="text-blue-400 font-medium">Looking for Manufacturer</span></div>}
                         </CardContent>
                     </Card>
 
                     {creator && (
                         <Card className="bg-gray-800 border-gray-700">
                              <CardHeader><CardTitle>Creator</CardTitle></CardHeader>
-                             <CardContent className="flex items-center space-x-4">
-                                <Avatar>
-                                    <AvatarImage src={creator.profile_picture} />
-                                    <AvatarFallback>{creator.display_name?.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-semibold text-white">{creator.display_name}</p>
-                                    <p className="text-xs text-slate-400">{creator.job_title}</p>
-                                </div>
+                             <CardContent>
+                                <Link to={createPageUrl(`Profile?id=${creator.id}`)} className="flex items-center space-x-4 group">
+                                    <Avatar>
+                                        <AvatarImage src={creator.profile_picture} />
+                                        <AvatarFallback>{creator.display_name?.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-semibold text-white group-hover:text-primary transition-colors">{creator.display_name}</p>
+                                        <p className="text-xs text-slate-400">{creator.job_title}</p>
+                                    </div>
+                                </Link>
                              </CardContent>
                         </Card>
                     )}
                     
-                     {collaborators.length > 0 && (
-                        <Card className="bg-gray-800 border-gray-700">
-                             <CardHeader><CardTitle>Collaborators</CardTitle></CardHeader>
-                             <CardContent className="space-y-3">
-                                {collaborators.map(c => (
-                                    <div key={c.id} className="flex items-center space-x-3">
-                                        <Avatar className="h-9 w-9">
-                                            <AvatarImage src={c.profile_picture} />
-                                            <AvatarFallback>{c.display_name?.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-semibold text-white">{c.display_name}</p>
-                                            <p className="text-xs text-slate-400">{c.job_title}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                             </CardContent>
-                        </Card>
-                    )}
+                     {/* The collaborators card was removed as per the outline */}
 
                     {project.seeking_collaborators?.length > 0 && (
                          <Card className="bg-gray-800 border-gray-700">

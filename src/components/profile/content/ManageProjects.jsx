@@ -1,101 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/api/entities';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Edit, Trash2, Plus } from 'lucide-react';
 import ProjectFormModal from '@/components/projects/ProjectFormModal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export default function ManageProjects({ user }) {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [editingProject, setEditingProject] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
-  const loadProjects = async () => {
-    if (!user || !user.email) return;
-    setLoading(true);
-    try {
-      const userProjects = await Project.filter({ created_by: user.email }, '-created_date');
-      setProjects(userProjects);
-    } catch (error) {
-      console.error("Failed to load projects", error);
-    }
-    setLoading(false);
-  };
+    const loadProjects = async () => {
+        setLoading(true);
+        if (user) {
+            const userProjects = await Project.filter({ created_by: user.email }, '-updated_date');
+            setProjects(userProjects);
+        }
+        setLoading(false);
+    };
 
-  useEffect(() => {
-    loadProjects();
-  }, [user]);
+    useEffect(() => {
+        if(user) loadProjects();
+    }, [user]);
 
-  const handleCreate = () => {
-    setSelectedProject(null);
-    setShowFormModal(true);
-  };
-  
-  const handleEdit = (project) => {
-    setSelectedProject(project);
-    setShowFormModal(true);
-  };
+    const handleEdit = (project) => {
+        setEditingProject(project);
+        setShowModal(true);
+    };
+    
+    const handleDelete = async (projectId) => {
+        if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+            await Project.delete(projectId);
+            loadProjects();
+        }
+    };
 
-  const handleSuccess = () => {
-    setShowFormModal(false);
-    setSelectedProject(null);
-    loadProjects();
-  };
-
-  const handleDelete = async (projectId) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      try {
-        await Project.delete(projectId);
+    const handleSuccess = () => {
+        setShowModal(false);
+        setEditingProject(null);
         loadProjects();
-      } catch (error) {
-        console.error("Failed to delete project", error);
-        alert("Error deleting project.");
-      }
     }
-  };
-  
-  const handleCloseModal = () => {
-    setShowFormModal(false);
-    setSelectedProject(null);
-  }
+    
+    const handleAddNew = () => {
+        setEditingProject(null);
+        setShowModal(true);
+    }
 
-  return (
-    <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-white">Manage Your Projects</CardTitle>
-            <Button type="button" onClick={handleCreate} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-2" /> Create Project</Button>
-        </CardHeader>
-        <CardContent>
-            {loading ? (
-                <p className="text-slate-400">Loading projects...</p>
+    if (loading) return <div className="text-center p-4 text-text-muted">Loading projects...</div>;
+
+    return (
+        <div className="space-y-4">
+             <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium text-main">Your Game Designs</h3>
+                <Button onClick={handleAddNew} className="btn-primary"><Plus className="w-4 h-4 mr-2" />Add New Design</Button>
+            </div>
+            {projects.length > 0 ? (
+                <div className="space-y-3">
+                    {projects.map(project => (
+                        <Card key={project.id} className="bg-background border-border-default flex justify-between items-center p-4">
+                            <div>
+                                <p className="font-semibold text-main">{project.title}</p>
+                                <p className="text-sm text-text-muted capitalize">{project.status?.replace(/_/g, ' ')}</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="icon" onClick={() => handleEdit(project)} className="text-main border-border-default hover:bg-slate-700">
+                                    <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="destructive" size="icon" onClick={() => handleDelete(project.id)}>
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             ) : (
-                <div className="space-y-4">
-                {projects.map(project => (
-                    <div key={project.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-900/50">
-                    <div>
-                        <p className="font-semibold text-white">{project.title}</p>
-                        <Badge variant="outline" className="text-slate-400 border-slate-600 mt-1 capitalize">{project.status?.replace(/_/g, ' ')}</Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button type="button" variant="outline" size="sm" onClick={() => handleEdit(project)} className="bg-gray-700 hover:bg-gray-600"><Edit className="w-4 h-4 mr-2" /> Edit</Button>
-                        <Button type="button" variant="destructive" size="sm" onClick={() => handleDelete(project.id)}><Trash2 className="w-4 h-4 mr-2" /> Delete</Button>
-                    </div>
-                    </div>
-                ))}
-                {projects.length === 0 && <p className="text-slate-400 text-center py-4">You haven't created any projects yet.</p>}
+                <div className="text-center py-8 border border-dashed border-border-default rounded-lg">
+                    <p className="text-text-muted">You haven't created any projects yet.</p>
                 </div>
             )}
-            {showFormModal && (
-                <ProjectFormModal 
-                    project={selectedProject} 
-                    open={showFormModal} 
-                    onClose={handleCloseModal} 
-                    onSuccess={handleSuccess} 
-                />
-            )}
-        </CardContent>
-    </Card>
-  );
+
+            <ProjectFormModal 
+                project={editingProject}
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                onSuccess={handleSuccess}
+            />
+        </div>
+    );
 }
