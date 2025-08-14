@@ -33,25 +33,6 @@ jobs:
     - name: Install backend dependencies
       run: cd server && npm install --production
       
-    - name: Create production server environment
-      run: |
-        cd server
-        cat > .env << EOF
-        # Production Database Configuration
-        DB_HOST=localhost
-        DB_USER=peoplein_bgs_user
-        DB_PASSWORD=!QAZ2wsx#EDC
-        DB_NAME=peoplein_BGS
-        
-        # Production Server Configuration
-        PORT=3001
-        NODE_ENV=production
-        FRONTEND_URL=https://boardgamestudio.com
-        
-        # Security
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        EOF
-      
     - name: Combine frontend and backend for deployment
       run: |
         echo "=== Creating combined deployment folder ==="
