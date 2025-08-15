@@ -87,6 +87,16 @@ export default function Profile() {
     setLoading(true);
     try {
       const me = await User.me();
+      // If the User.me returned a structured error, pass it through so UI can show it
+      if (me && me._error) {
+        console.error('User.me returned error object:', me);
+        setCurrentUser(null);
+        setProfileUser(null);
+        // Store the last API error so the UI can display it
+        window.__LAST_API_ERROR__ = me;
+        setLoading(false);
+        return;
+      }
       setCurrentUser(me);
 
       const searchParams = new URLSearchParams(location.search);

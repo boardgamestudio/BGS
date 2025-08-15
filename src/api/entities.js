@@ -161,8 +161,8 @@ export const User = {
       return user;
     } catch (error) {
       console.error('User.me error:', error);
-      // Return null if not authenticated instead of throwing
-      return null;
+      // Return a structured error object so the UI can show backend messages
+      return { _error: true, message: error.message || 'Failed to fetch user', details: error.data || error };
     }
   },
 
