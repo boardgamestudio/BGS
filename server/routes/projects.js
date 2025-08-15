@@ -13,24 +13,49 @@ router.get('/', async (req, res) => {
       orderBy = 'ORDER BY p.created_date ASC';
     }
     
+    // Build dynamic WHERE clause to allow filtering by creator (email or id)
+    const params = [];
+    const whereClauses = ["p.status = 'published'"];
+
+    // Support ?created_by=<email or id> (if numeric treated as id, otherwise treated as email)
+    if (req.query.created_by) {
+      const createdBy = req.query.created_by;
+      if (!isNaN(createdBy)) {
+        whereClauses.push('p.created_by = ?');
+        params.push(parseInt(createdBy, 10));
+      } else {
+        whereClauses.push('u.email = ?');
+        params.push(createdBy);
+      }
+    }
+
+    // Support explicit created_by_id param
+    if (req.query.created_by_id) {
+      whereClauses.push('p.created_by = ?');
+      params.push(parseInt(req.query.created_by_id, 10));
+    }
+
+    const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
     const sql = `
       SELECT p.*, u.name as author_name, u.email as created_by_email 
       FROM projects p 
       LEFT JOIN users u ON p.created_by = u.id 
-      WHERE p.status = 'published' 
+      ${whereSql}
       ${orderBy} 
       LIMIT ?
     `;
-    
-    const projects = await db.query(sql, [limit]);
-    
+
+    params.push(limit);
+    const projects = await db.query(sql, params);
+
     // Parse JSON fields and format response
     const formattedProjects = projects.map(project => ({
       ...project,
       tags: project.tags ? JSON.parse(project.tags) : [],
       created_by: project.created_by_email
     }));
-    
+
     res.json(formattedProjects);
   } catch (error) {
     console.error('Projects list error:', error);

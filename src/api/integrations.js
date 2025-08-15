@@ -2,14 +2,46 @@
 // These will need proper implementation later with your backend
 
 export const UploadFile = async ({ file }) => {
-  // Temporary placeholder - returns a dummy URL
-  // TODO: Implement actual file upload to your server or cloud storage
-  console.warn('File upload not yet implemented - using placeholder');
-  
-  return {
-    file_url: `https://via.placeholder.com/400x300?text=${encodeURIComponent(file.name)}`,
-    success: true
-  };
+  if (!file) {
+    throw new Error('No file provided for upload');
+  }
+
+  // Use FormData to send the file to the server uploads endpoint
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // Use a relative URL in production so it goes to the same domain.
+  // For local development, default to localhost:3001 (server/PORT).
+  const localHost = 'http://localhost:3001';
+  const uploadPath = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE === 'production') 
+    ? '/uploads' 
+    : `${localHost}/uploads`;
+
+  try {
+    const response = await fetch(uploadPath, {
+      method: 'POST',
+      body: formData
+      // Note: Do NOT set Content-Type header for FormData; the browser will set it.
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.warn('Upload failed:', data);
+      throw new Error(data.error || data.message || `Upload failed with status ${response.status}`);
+    }
+
+    return {
+      file_url: data.file_url,
+      success: true
+    };
+  } catch (err) {
+    console.warn('File upload failed, falling back to placeholder', err);
+    return {
+      file_url: `https://via.placeholder.com/400x300?text=${encodeURIComponent(file.name)}`,
+      success: false
+    };
+  }
 };
 
 export const SendEmail = async (data) => {

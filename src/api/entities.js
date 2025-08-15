@@ -164,6 +164,16 @@ export const User = {
       // Return null if not authenticated instead of throwing
       return null;
     }
+  },
+
+  async update(data) {
+    try {
+      const result = await apiClient.put('/users/me', data);
+      return result;
+    } catch (error) {
+      console.error('User.update error:', error);
+      throw error;
+    }
   }
 };
 
