@@ -44,13 +44,14 @@ const authenticateToken = (req, res, next) => {
 // Apply authentication middleware to all routes
 app.use(authenticateToken);
 
-// API Routes - NO /api prefix since /api directory IS the website root
+ // API Routes - NO /api prefix since /api directory IS the website root
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
 app.use('/projects', require('./routes/projects'));
 app.use('/jobs', require('./routes/jobs'));
 app.use('/events', require('./routes/events'));
 app.use('/users', require('./routes/users'));
+app.use('/uploads', require('./routes/uploads'));
 app.use('/design-diaries', require('./routes/design-diaries'));
 
 // Health check endpoint
