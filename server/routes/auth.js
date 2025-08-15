@@ -27,15 +27,16 @@ const authenticateToken = (req, res, next) => {
 router.post('/register', async (req, res) => {
   try {
     const { email, name, password } = req.body;
+    console.log(`Register attempt for: ${email} from ${req.ip}`);
 
     if (!email || !name || !password) {
-      return res.status(400).json({ error: 'Email, name, and password are required' });
+      return res.status(400).json({ error: 'Email, name, and password are required', message: 'Email, name, and password are required' });
     }
 
     // Check if user already exists
     const existingUser = await db.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existingUser.length > 0) {
-      return res.status(409).json({ error: 'User with this email already exists' });
+      return res.status(409).json({ error: 'User with this email already exists', message: 'User with this email already exists' });
     }
 
     // Hash password
@@ -48,7 +49,7 @@ router.post('/register', async (req, res) => {
     // Insert new user
     const result = await db.query(
       `INSERT INTO users (email, name, password_hash, email_verification_token, status) 
-       VALUES (?, ?, ?, ?, 'pending')`,
+       VALUES (?, ?, ?, ?, 'active')`,
       [email, name, passwordHash, verificationToken]
     );
 
@@ -59,15 +60,15 @@ router.post('/register', async (req, res) => {
     );
 
     res.status(201).json({
-      message: 'User registered successfully. Please check your email for verification.',
+      message: 'User registered successfully.',
       userId: result.insertId,
-      verificationRequired: true
+      verificationRequired: false
     });
 
     // TODO: Send verification email
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: 'Registration failed', message: 'Registration failed' });
   }
 });
 
@@ -75,9 +76,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(`Login attempt for: ${email} from ${req.ip}`);
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({ error: 'Email and password are required', message: 'Email and password are required' });
     }
 
     // Get user with password hash
@@ -87,20 +89,20 @@ router.post('/login', async (req, res) => {
     );
 
     if (users.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials', message: 'Invalid credentials' });
     }
 
     const user = users[0];
 
     // Check if account is active
     if (user.status !== 'active') {
-      return res.status(401).json({ error: 'Account is not active' });
+      return res.status(401).json({ error: 'Account is not active', message: 'Account is not active' });
     }
 
     // Verify password
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials', message: 'Invalid credentials' });
     }
 
     // Generate JWT token
@@ -137,6 +139,8 @@ router.post('/login', async (req, res) => {
       [user.id, 'user_login', req.ip]
     );
 
+    console.log(`Login successful for user id: ${user.id} from ${req.ip}`);
+
     res.json({
       message: 'Login successful',
       token,
@@ -150,7 +154,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Login failed', message: 'Login failed' });
   }
 });
 

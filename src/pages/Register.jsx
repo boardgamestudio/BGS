@@ -70,13 +70,15 @@ export default function Register() {
 
       if (response.ok) {
         setSuccess(true);
+        // Use server message if provided
+        const serverMsg = data.message || 'Registration successful!';
         setTimeout(() => {
           navigate('/login', { 
-            state: { message: 'Registration successful! Please log in.' }
+            state: { message: serverMsg + ' Please log in.' }
           });
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.error || data.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);

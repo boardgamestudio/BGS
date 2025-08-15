@@ -46,13 +46,14 @@ export default function Login() {
         localStorage.setItem('user', JSON.stringify(data.user));
         
         // Redirect to admin if user is admin, otherwise dashboard
-        if (data.user.user_role === 'admin') {
+        const role = data.user && (data.user.role || data.user.user_role);
+        if (role === 'admin') {
           navigate('/admin');
         } else {
           navigate('/dashboard');
         }
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.error || data.message || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
