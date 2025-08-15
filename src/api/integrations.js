@@ -10,12 +10,8 @@ export const UploadFile = async ({ file }) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  // Use a relative URL in production so it goes to the same domain.
-  // For local development, default to localhost:3001 (server/PORT).
-  const localHost = 'http://localhost:3001';
-  const uploadPath = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.MODE === 'production') 
-    ? '/uploads' 
-    : `${localHost}/uploads`;
+  // Always use relative path for uploads so production uses the same domain.
+  const uploadPath = '/uploads';
 
   try {
     const response = await fetch(uploadPath, {

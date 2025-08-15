@@ -7,6 +7,29 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Startup diagnostic: check required env vars and perform a lightweight DB query to confirm connectivity.
+// This logs helpful information for troubleshooting but does not change runtime behaviour.
+(() => {
+  const requiredEnv = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_SECRET'];
+  const missing = requiredEnv.filter(k => !process.env[k]);
+  if (missing.length) {
+    console.error('STARTUP DIAGNOSTIC: Missing required env vars:', missing.join(', '));
+    console.error('Ensure the production .env on the server is correct and was not overwritten by CI.');
+  }
+
+  try {
+    const db = require('./config/database');
+    db.query('SELECT COUNT(*) AS c FROM users').then(rows => {
+      const count = rows && rows[0] && (rows[0].c ?? rows[0]['COUNT(*)'] ?? 0);
+      console.log(`DB DIAGNOSTIC: host=${process.env.DB_HOST || 'unknown'} db=${process.env.DB_NAME || 'unknown'} users=${count}`);
+    }).catch(err => {
+      console.error('DB DIAGNOSTIC ERROR: failed to query users count:', err && err.message ? err.message : err);
+    });
+  } catch (err) {
+    console.error('DB DIAGNOSTIC ERROR: could not load database module:', err && err.message ? err.message : err);
+  }
+})();
+
 // Middleware
 app.use(helmet());
 app.use(cors({
