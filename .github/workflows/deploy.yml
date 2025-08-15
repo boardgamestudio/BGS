@@ -45,22 +45,10 @@ jobs:
         cp -r ./server/* ./deploy/
         cp ./server/.htaccess ./deploy/
         
-        echo "=== Creating production .env ==="
-        cat > ./deploy/.env << EOF
-        # Production Database Configuration
-        DB_HOST=localhost
-        DB_USER=peoplein_bgs_user
-        DB_PASSWORD=!QAZ2wsx#EDC
-        DB_NAME=peoplein_BGS
-        
-        # Production Server Configuration
-        PORT=3001
-        NODE_ENV=production
-        FRONTEND_URL=https://boardgamestudio.com
-        
-        # Security
-        JWT_SECRET=bgs_production_jwt_secret_2025_secure_key_change_me
-        EOF
+        echo "=== Skipping creation of production .env ==="
+        echo "Note: Creating or copying a production .env during CI is dangerous and may overwrite server configuration."
+        echo "Ensure production .env is managed directly on the server or via secure cPanel environment variables."
+        echo "If you need an example env file included with the deploy, create ./deploy/.env.example instead (will not be copied to production)."
         
         echo "=== Final deployment structure ==="
         ls -la ./deploy/
@@ -81,5 +69,6 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
+          **/.env
           **/.env.example
           **/MIGRATIONS.md
