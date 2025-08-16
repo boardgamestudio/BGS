@@ -166,6 +166,16 @@ export const User = {
     }
   },
 
+  async updateMyUserData(data) {
+    try {
+      const result = await apiClient.put('/auth/me', data);
+      return result;
+    } catch (error) {
+      console.error('User.updateMyUserData error:', error);
+      throw error;
+    }
+  },
+
   async logout() {
     try {
       await apiClient.post('/auth/logout');
