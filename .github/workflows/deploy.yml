@@ -35,14 +35,19 @@ jobs:
       
     - name: Combine frontend and backend for deployment
       run: |
+        echo "=== Cleaning up old deployment folder ==="
+        rm -rf ./deploy
         echo "=== Creating combined deployment folder ==="
         mkdir -p ./deploy
         
         echo "=== Copying frontend files ==="
         cp -r ./dist/* ./deploy/
         
-        echo "=== Copying backend files ==="
-        cp -r ./server/* ./deploy/
+        echo "=== Verifying frontend build ==="
+        ls -la ./deploy/
+        
+        echo "=== Copying backend files (excluding index.html) ==="
+        rsync -av --progress ./server/ ./deploy/ --exclude index.html
         cp ./server/.htaccess ./deploy/
         
         echo "=== Creating production .env ==="
