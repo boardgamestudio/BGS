@@ -164,6 +164,15 @@ export const User = {
       // Return null if not authenticated instead of throwing
       return null;
     }
+  },
+
+  async logout() {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      console.error('User.logout error:', error);
+      throw error;
+    }
   }
 };
 

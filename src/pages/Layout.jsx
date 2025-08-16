@@ -74,9 +74,11 @@ export default function Layout({ children, currentPageName }) {
   const handleLogout = async () => {
     try {
       await User.logout();
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       setCurrentUser(null);
-      // Refresh the page to clear any cached data
-      window.location.reload();
+      // Redirect to login page
+      window.location.href = '/login';
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -382,4 +384,3 @@ export default function Layout({ children, currentPageName }) {
     </>);
 
 }
-
