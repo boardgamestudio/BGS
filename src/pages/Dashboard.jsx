@@ -185,7 +185,7 @@ export default function Dashboard() {
       <div className="text-center py-6">
         <h1 className="text-5xl md:text-7xl font-extrabold font-serif leading-tight">
           <span className="text-primary">The Ultimate Hub for</span><br />
-          <span className="text-orange-400">Board Game Designers</span><br />
+          <span className="text-orange-400">Awesome Board Game Designers</span><br />
           <span className="text-teal-400">and Creatives</span>
         </h1>
       </div>
