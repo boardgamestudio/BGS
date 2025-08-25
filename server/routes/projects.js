@@ -40,8 +40,10 @@ router.get('/', async (req, res) => {
 
 // GET /api/projects/:id - Get single project
 router.get('/:id', async (req, res) => {
+  console.log(`[DEBUG] GET /projects/:id route hit.`);
   try {
     const { id } = req.params;
+    console.log(`[DEBUG] Attempting to fetch project with ID: ${id}`);
     
     const sql = `
       SELECT p.*, u.name as author_name, u.email as created_by_email 
@@ -51,8 +53,10 @@ router.get('/:id', async (req, res) => {
     `;
     
     const projects = await db.query(sql, [id]);
+    console.log(`[DEBUG] Database query returned ${projects.length} results.`);
     
     if (projects.length === 0) {
+      console.log(`[DEBUG] Project with ID ${id} not found. Returning 404.`);
       return res.status(404).json({ error: 'Project not found' });
     }
     
@@ -62,6 +66,7 @@ router.get('/:id', async (req, res) => {
       created_by: projects[0].created_by_email
     };
     
+    console.log(`[DEBUG] Sending project data for ID: ${id}`);
     res.json(project);
   } catch (error) {
     console.error('Project get error:', error);

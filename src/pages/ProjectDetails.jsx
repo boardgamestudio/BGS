@@ -21,7 +21,9 @@ export default function ProjectDetailsPage() {
     const { id } = useParams(); // Use useParams to get the ID from the URL path
 
     const loadProjectData = async (projectId) => {
+        console.log(`[DEBUG] Frontend: Loading project data for ID: ${projectId}`);
         if (!projectId) {
+            console.log("[DEBUG] Frontend: No project ID provided.");
             setLoading(false);
             setError("No project ID provided.");
             return;
@@ -31,7 +33,10 @@ export default function ProjectDetailsPage() {
         setError(null);
         try {
             const projectData = await Project.get(projectId);
+            console.log("[DEBUG] Frontend: Received data from API:", projectData);
+
             if (!projectData) {
+                console.log(`[DEBUG] Frontend: Project with ID ${projectId} not found in API response.`);
                 setProject(null);
                 setError(`Project with ID ${projectId} not found.`);
             } else {
@@ -42,7 +47,7 @@ export default function ProjectDetailsPage() {
                 }
             }
         } catch (err) {
-            console.error("Failed to load project", err);
+            console.error("[DEBUG] Frontend: Failed to load project", err);
             setError("Could not load game design details. The server might be temporarily unavailable. Please try again later.");
         }
         setLoading(false);
