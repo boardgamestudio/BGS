@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Project, User } from '@/api/entities';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Users, Clock, Edit, User as UserIcon, Puzzle, Star, Link as LinkIcon, E
 import ProjectFormModal from '../components/projects/ProjectFormModal';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 export default function ProjectDetailsPage() {
@@ -19,16 +18,12 @@ export default function ProjectDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [showEditModal, setShowEditModal] = useState(false);
     const [error, setError] = useState(null);
-    
-    const getProjectId = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('id');
-    };
+    const { id } = useParams(); // Use useParams to get the ID from the URL path
 
-    const loadProjectData = async () => {
-        const projectId = getProjectId();
+    const loadProjectData = async (projectId) => {
         if (!projectId) {
             setLoading(false);
+            setError("No project ID provided.");
             return;
         }
         
@@ -36,13 +31,16 @@ export default function ProjectDetailsPage() {
         setError(null);
         try {
             const projectData = await Project.get(projectId);
-            setProject(projectData);
-
-            if (projectData.created_by) {
-                const creatorData = await User.filter({ email: projectData.created_by });
-                if(creatorData.length > 0) setCreator(creatorData[0]);
+            if (!projectData) {
+                setProject(null);
+                setError(`Project with ID ${projectId} not found.`);
+            } else {
+                setProject(projectData);
+                if (projectData.created_by) {
+                    const creatorData = await User.filter({ email: projectData.created_by });
+                    if(creatorData.length > 0) setCreator(creatorData[0]);
+                }
             }
-
         } catch (err) {
             console.error("Failed to load project", err);
             setError("Could not load game design details. The server might be temporarily unavailable. Please try again later.");
@@ -60,13 +58,13 @@ export default function ProjectDetailsPage() {
     };
     
     useEffect(() => {
-        loadProjectData();
+        loadProjectData(id);
         loadUser();
-    }, []);
+    }, [id]); // Re-run the effect if the ID changes
 
     const handleUpdateSuccess = async () => {
         setShowEditModal(false);
-        await loadProjectData();
+        await loadProjectData(id);
     }
 
     if (loading) {

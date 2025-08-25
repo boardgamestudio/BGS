@@ -21,7 +21,7 @@ export default function ProjectCard({ project, author, projectAuthors = {} }) {
   const actualAuthor = author || projectAuthors[project.created_by] || projectAuthors[project.created_by_id] || projectAuthors[project.author_id];
   
   return (
-    <Link to={createPageUrl(`ProjectDetails?id=${project.id}`)} className="group">
+    <Link to={`/projects/${project.id}`} className="group">
         <Card className="bg-surface border-border-default hover:border-primary transition-all duration-300 flex flex-col h-full overflow-hidden">
             <div className="aspect-video bg-background relative overflow-hidden">
                 {project.main_image_url ? (
